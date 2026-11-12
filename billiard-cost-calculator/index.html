@@ -5,323 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>당구장 원가계산기</title>
 <style>
-  :root {
-    --bg: #f6f7f9;
-    --card: #ffffff;
-    --text: #1b1f24;
-    --muted: #5d6673;
-    --line: #e2e5ea;
-    --accent: #1f7a4d;
-    --accent-soft: #e5f3ec;
-    --neg: #c0392b;
-    --neg-soft: #fbeaea;
-    --input-bg: #fbfcfd;
-    --c1: #2e6fd8; --c2: #e08a1e; --c3: #8e44ad; --c4: #1f9e8a; --c5: #c0392b; --c6: #7f8c8d;
-  }
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1b1f24; --muted:#5d6673; --line:#e2e5ea; --pos:#1f7a4d; --neg:#c0392b; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #121417; --card: #1c1f24; --text: #e8eaed; --muted: #9aa3ae; --line: #2d323a;
-      --accent: #4cc38a; --accent-soft: #173326; --neg: #ff6b5e; --neg-soft: #3a1d1b; --input-bg: #16191d;
-      --c1: #5b93f0; --c2: #f0a647; --c3: #b57ad1; --c4: #3fc4ae; --c5: #ff6b5e; --c6: #a0aab3;
-    }
+    :root:not([data-theme="light"]) { --bg:#121417; --card:#1c1f24; --text:#e8eaed; --muted:#9aa3ae; --line:#2d323a; --pos:#4cc38a; --neg:#ff6b5e; }
   }
-  :root[data-theme="dark"] {
-    --bg: #121417; --card: #1c1f24; --text: #e8eaed; --muted: #9aa3ae; --line: #2d323a;
-    --accent: #4cc38a; --accent-soft: #173326; --neg: #ff6b5e; --neg-soft: #3a1d1b; --input-bg: #16191d;
-    --c1: #5b93f0; --c2: #f0a647; --c3: #b57ad1; --c4: #3fc4ae; --c5: #ff6b5e; --c6: #a0aab3;
-  }
+  :root[data-theme="dark"] { --bg:#121417; --card:#1c1f24; --text:#e8eaed; --muted:#9aa3ae; --line:#2d323a; --pos:#4cc38a; --neg:#ff6b5e; }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
-    font-size: 15px; line-height: 1.5;
-  }
-  .wrap { max-width: 1120px; margin: 0 auto; padding: 24px 16px 48px; }
-  header h1 { margin: 0 0 4px; font-size: 24px; }
-  header p { margin: 0 0 20px; color: var(--muted); }
-  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
-  @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
-  .card h2 { font-size: 16px; margin: 0 0 12px; }
-  .field { display: grid; grid-template-columns: 1fr 150px; gap: 10px; align-items: center; padding: 5px 0; }
-  .field label { color: var(--text); }
-  .field small { display: block; color: var(--muted); font-size: 12px; }
-  .inp { display: flex; align-items: center; gap: 6px; }
-  .inp input, .inp select {
-    width: 100%; padding: 7px 9px; border: 1px solid var(--line); border-radius: 8px;
-    background: var(--input-bg); color: var(--text); font-size: 15px; text-align: right;
-  }
-  .inp select { text-align: left; }
-  .inp span { color: var(--muted); font-size: 13px; min-width: 28px; }
-  .check { display: flex; gap: 8px; align-items: center; padding: 6px 0; }
-  .kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .kpi { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
-  .kpi .l { color: var(--muted); font-size: 13px; }
-  .kpi .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
-  .kpi .s { color: var(--muted); font-size: 12px; }
-  .kpi.pos { background: var(--accent-soft); border-color: transparent; }
-  .kpi.pos .v { color: var(--accent); }
-  .kpi.neg { background: var(--neg-soft); border-color: transparent; }
-  .kpi.neg .v { color: var(--neg); }
-  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-  th, td { padding: 7px 6px; border-bottom: 1px solid var(--line); text-align: right; }
-  th:first-child, td:first-child { text-align: left; }
-  th { color: var(--muted); font-weight: 600; font-size: 13px; }
-  tr.total td { font-weight: 700; border-top: 2px solid var(--text); }
-  .bar { display: flex; height: 18px; border-radius: 6px; overflow: hidden; margin: 6px 0 12px; background: var(--line); }
-  .bar div { height: 100%; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
-  .pos-t { color: var(--accent); } .neg-t { color: var(--neg); }
-  .note { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
-  .note li { margin-bottom: 4px; }
-  .scroll { overflow-x: auto; }
-  button.reset { border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 7px 14px; border-radius: 8px; cursor: pointer; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  .wrap { max-width:480px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:20px; margin:0 0 14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; margin-bottom:14px; }
+  .row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; gap:10px; }
+  .row input { width:110px; padding:6px 8px; border:1px solid var(--line); border-radius:8px; background:var(--bg); color:var(--text); font-size:15px; text-align:right; }
+  .row span.u { color:var(--muted); font-size:13px; width:32px; }
+  .row .r { display:flex; align-items:center; gap:6px; }
+  .big { text-align:center; padding:6px 0 10px; }
+  .big .l { color:var(--muted); font-size:13px; }
+  .big .v { font-size:32px; font-weight:800; }
+  .pos { color:var(--pos); } .neg { color:var(--neg); }
+  .res .row { border-bottom:1px solid var(--line); font-variant-numeric:tabular-nums; }
+  .res .row:last-child { border-bottom:0; }
+  label.chk { display:flex; gap:8px; align-items:center; padding-top:6px; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>당구장 운영 원가계산기</h1>
-    <p>값을 바꾸면 결과가 바로 다시 계산됩니다. 금액 단위는 표시된 단위(만원/원)를 따릅니다.</p>
-  </header>
+  <h1>🎱 당구장 원가계산기</h1>
 
-  <div class="grid">
-    <!-- 입력 -->
-    <div>
-      <div class="card">
-        <h2>매장 기본정보</h2>
-        <div class="field"><label>매장 면적</label><div class="inp"><input id="area" type="number" value="60"><span>평</span></div></div>
-        <div class="field"><label>당구대(다이) 수</label><div class="inp"><input id="tables" type="number" value="18"><span>대</span></div></div>
-        <div class="field"><label>영업 시작<small>24시간제</small></label><div class="inp"><input id="open" type="number" value="10" step="0.5"><span>시</span></div></div>
-        <div class="field"><label>영업 종료<small>23 = 밤 11시, 자정 넘기면 25, 26…</small></label><div class="inp"><input id="close" type="number" value="23" step="0.5"><span>시</span></div></div>
-        <div class="field"><label>월 영업일</label><div class="inp"><input id="days" type="number" value="30"><span>일</span></div></div>
-      </div>
+  <div class="card">
+    <div class="row"><span>월 매출</span><span class="r"><input id="rev" type="number" value="700"><span class="u">만원</span></span></div>
+    <div class="row"><span>월세</span><span class="r"><input id="rent" type="number" value="180"><span class="u">만원</span></span></div>
+    <div class="row"><span>세금</span><span class="r"><input id="tax" type="number" value="200"><span class="u">만원</span></span></div>
+    <div class="row"><span>인건비 (1명, 13시간×30일, 최저시급)</span><span class="r"><input id="labor" type="number" value="402.5" step="0.1"><span class="u">만원</span></span></div>
+    <div class="row"><span>천갈이 (다이당 70만 × 18대 ÷ 8년)</span><span class="r"><input id="cloth" type="number" value="13.1" step="0.1"><span class="u">만원</span></span></div>
+    <div class="row"><span>권리금</span><span class="r"><input id="premium" type="number" value="5000"><span class="u">만원</span></span></div>
+    <label class="chk"><input id="owner" type="checkbox"> 사장 직접 근무 (인건비 0)</label>
+  </div>
 
-      <div class="card">
-        <h2>초기 투자금</h2>
-        <div class="field"><label>권리금</label><div class="inp"><input id="premium" type="number" value="5000"><span>만원</span></div></div>
-        <div class="field"><label>권리금 회수(상각) 기간<small>이 기간 동안 나눠서 원가에 반영</small></label><div class="inp"><input id="premiumMonths" type="number" value="60"><span>개월</span></div></div>
-        <div class="field"><label>보증금</label><div class="inp"><input id="deposit" type="number" value="3000"><span>만원</span></div></div>
-        <div class="field"><label>보증금 기회비용 이율<small>예금했을 때 받을 이자 (연)</small></label><div class="inp"><input id="depositRate" type="number" value="3" step="0.1"><span>%</span></div></div>
-      </div>
-
-      <div class="card">
-        <h2>월 고정비</h2>
-        <div class="field"><label>월세</label><div class="inp"><input id="rent" type="number" value="180"><span>만원</span></div></div>
-        <div class="field"><label>세금</label><div class="inp"><input id="tax" type="number" value="200"><span>만원</span></div></div>
-        <div class="field"><label>전기·수도·관리비<small>미입력 시 0</small></label><div class="inp"><input id="utility" type="number" value="0"><span>만원</span></div></div>
-        <div class="field"><label>기타 (소모품·음료 원가 등)</label><div class="inp"><input id="etc" type="number" value="0"><span>만원</span></div></div>
-      </div>
-
-      <div class="card">
-        <h2>인건비</h2>
-        <div class="field"><label>근무자 수</label><div class="inp"><input id="staff" type="number" value="1"><span>명</span></div></div>
-        <div class="field"><label>시급<small>2026년 최저시급 10,320원</small></label><div class="inp"><input id="wage" type="number" value="10320"><span>원</span></div></div>
-        <div class="field"><label>1인 일 근무시간<small>기본값 = 영업시간</small></label><div class="inp"><input id="workHours" type="number" value="13" step="0.5"><span>시간</span></div></div>
-        <div class="field"><label>1인 월 근무일</label><div class="inp"><input id="workDays" type="number" value="30"><span>일</span></div></div>
-        <div class="field"><label>추가 부담률<small>주휴수당·4대보험·퇴직금 등</small></label><div class="inp"><input id="laborExtra" type="number" value="0" step="1"><span>%</span></div></div>
-        <label class="check"><input id="ownerWorks" type="checkbox"> 사장 본인이 직접 근무 (인건비 0원)</label>
-      </div>
-
-      <div class="card">
-        <h2>유지보수비</h2>
-        <div class="field"><label>천갈이 비용</label><div class="inp"><input id="cloth" type="number" value="70"><span>만원</span></div></div>
-        <div class="field"><label>천갈이 비용 기준</label><div class="inp"><select id="clothUnit"><option value="per">다이 1대당</option><option value="all">전체 다이 합계</option></select></div></div>
-        <div class="field"><label>천갈이 주기</label><div class="inp"><input id="clothYears" type="number" value="8" step="0.5"><span>년</span></div></div>
-        <div class="field"><label>기타 수리·장비 (월)</label><div class="inp"><input id="repair" type="number" value="0"><span>만원</span></div></div>
-      </div>
-
-      <div class="card">
-        <h2>수입</h2>
-        <div class="field"><label>월평균 매출</label><div class="inp"><input id="revenue" type="number" value="700"><span>만원</span></div></div>
-        <div class="field"><label>다이 시간당 요금<small>가동률 계산용 (10분 2,000원 = 12,000원)</small></label><div class="inp"><input id="price" type="number" value="12000"><span>원</span></div></div>
-      </div>
-      <button class="reset" id="reset">기본값으로 되돌리기</button>
-    </div>
-
-    <!-- 결과 -->
-    <div>
-      <div class="card">
-        <h2>핵심 지표 (월 기준)</h2>
-        <div class="kpis">
-          <div class="kpi" id="k-cash"><div class="l">월 현금 순이익</div><div class="v" id="v-cash"></div><div class="s">매출 − 현금 지출</div></div>
-          <div class="kpi" id="k-econ"><div class="l">월 실질 순이익</div><div class="v" id="v-econ"></div><div class="s">권리금 상각·보증금 기회비용·천갈이 적립 포함</div></div>
-          <div class="kpi"><div class="l">손익분기 매출</div><div class="v" id="v-bep"></div><div class="s" id="s-bep"></div></div>
-          <div class="kpi"><div class="l">권리금 회수 기간</div><div class="v" id="v-payback"></div><div class="s">현금 순이익으로 권리금 회수</div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>월 원가 구성</h2>
-        <div class="bar" id="bar"></div>
-        <div class="scroll">
-          <table>
-            <thead><tr><th>항목</th><th>월 금액</th><th>매출 대비</th><th>구분</th></tr></thead>
-            <tbody id="costRows"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>다이·시간 단위 분석</h2>
-        <div class="scroll">
-          <table><tbody id="unitRows"></tbody></table>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>매출 시나리오</h2>
-        <div class="scroll">
-          <table>
-            <thead><tr><th>월 매출</th><th>현금 순이익</th><th>실질 순이익</th><th>가동률</th></tr></thead>
-            <tbody id="scenRows"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>계산 기준</h2>
-        <ul class="note">
-          <li><b>현금 순이익</b> = 매출 − (월세 + 세금 + 인건비 + 공과금 + 기타 + 수리비 + 천갈이 적립). 실제로 매달 남는 돈입니다.</li>
-          <li><b>실질 순이익</b> = 현금 순이익 − 권리금 월 상각액 − 보증금 기회비용. 투자금까지 고려한 진짜 수익입니다.</li>
-          <li>천갈이 비용은 주기(년×12개월)로 나눠 매달 적립하는 것으로 계산합니다.</li>
-          <li>인건비 = 시급 × 일 근무시간 × 월 근무일 × 근무자 수 × (1 + 추가 부담률).</li>
-          <li>가동률 = 매출 ÷ (다이 수 × 영업시간 × 영업일 × 시간당 요금).</li>
-          <li>보증금은 계약 종료 시 돌려받으므로 원가가 아니라 기회비용(이자)만 반영합니다.</li>
-        </ul>
-      </div>
+  <div class="card">
+    <div class="big"><div class="l">월 순이익</div><div class="v" id="profit"></div></div>
+    <div class="res">
+      <div class="row"><span>월 비용 합계</span><b id="cost"></b></div>
+      <div class="row"><span>손익분기 매출</span><b id="bep"></b></div>
+      <div class="row"><span>연 순이익</span><b id="year"></b></div>
+      <div class="row"><span>권리금 회수 기간</span><b id="payback"></b></div>
     </div>
   </div>
+  <p style="color:var(--muted);font-size:12px;margin:0">보증금 3,000만원은 돌려받는 돈이라 비용에서 제외. 전기·관리비는 미반영.</p>
 </div>
-
 <script>
-(function () {
-  const ids = ["area","tables","open","close","days","premium","premiumMonths","deposit","depositRate",
-    "rent","tax","utility","etc","staff","wage","workHours","workDays","laborExtra","ownerWorks",
-    "cloth","clothUnit","clothYears","repair","revenue","price"];
-  const el = Object.fromEntries(ids.map(i => [i, document.getElementById(i)]));
-  const defaults = Object.fromEntries(ids.map(i => [i, el[i].type === "checkbox" ? el[i].checked : el[i].value]));
-  const MAN = 10000;
-  const num = i => { const v = parseFloat(el[i].value); return isFinite(v) ? v : 0; };
-  const won = v => (v < 0 ? "−" : "") + Math.round(Math.abs(v)).toLocaleString("ko-KR") + "원";
-  const man = v => (v < 0 ? "−" : "") + (Math.round(Math.abs(v) / MAN * 10) / 10).toLocaleString("ko-KR") + "만원";
-  const pct = v => isFinite(v) ? (Math.round(v * 1000) / 10).toLocaleString("ko-KR") + "%" : "-";
-  const sign = v => v >= 0 ? "pos-t" : "neg-t";
-
-  let workHoursTouched = false;
-  el.workHours.addEventListener("input", () => { workHoursTouched = true; });
-
-  function calc(revenueOverride) {
-    const tables = num("tables"), days = num("days");
-    const opHours = Math.max(0, num("close") - num("open"));
-    const revenue = revenueOverride != null ? revenueOverride : num("revenue") * MAN;
-
-    const rent = num("rent") * MAN, tax = num("tax") * MAN;
-    const utility = num("utility") * MAN, etc = num("etc") * MAN, repair = num("repair") * MAN;
-    const labor = el.ownerWorks.checked ? 0 :
-      num("wage") * num("workHours") * num("workDays") * num("staff") * (1 + num("laborExtra") / 100);
-    const clothTotal = num("cloth") * MAN * (el.clothUnit.value === "per" ? tables : 1);
-    const clothMonths = num("clothYears") * 12;
-    const clothMonthly = clothMonths > 0 ? clothTotal / clothMonths : 0;
-    const premiumMonthly = num("premiumMonths") > 0 ? num("premium") * MAN / num("premiumMonths") : 0;
-    const depositMonthly = num("deposit") * MAN * num("depositRate") / 100 / 12;
-
-    const costs = [
-      { name: "월세", v: rent, type: "현금", c: "--c1" },
-      { name: "세금", v: tax, type: "현금", c: "--c2" },
-      { name: "인건비", v: labor, type: "현금", c: "--c3" },
-      { name: "전기·수도·관리비", v: utility, type: "현금", c: "--c4" },
-      { name: "기타 운영비", v: etc, type: "현금", c: "--c4" },
-      { name: "수리·장비", v: repair, type: "현금", c: "--c4" },
-      { name: "천갈이 적립", v: clothMonthly, type: "적립", c: "--c5" },
-      { name: "권리금 상각", v: premiumMonthly, type: "투자", c: "--c6" },
-      { name: "보증금 기회비용", v: depositMonthly, type: "투자", c: "--c6" },
-    ];
-    const cashCost = costs.filter(x => x.type !== "투자").reduce((a, b) => a + b.v, 0);
-    const totalCost = costs.reduce((a, b) => a + b.v, 0);
-    const capacity = tables * opHours * days * num("price");
-    return {
-      revenue, costs, cashCost, totalCost, labor, clothTotal, opHours, tables, days, capacity,
-      cash: revenue - cashCost, econ: revenue - totalCost,
-      premium: num("premium") * MAN, deposit: num("deposit") * MAN,
-    };
+  const $ = id => document.getElementById(id);
+  const n = id => parseFloat($(id).value) || 0;
+  const fmt = v => (Math.round(v * 10) / 10).toLocaleString("ko-KR") + "만원";
+  function calc() {
+    const labor = $("owner").checked ? 0 : n("labor");
+    const cost = n("rent") + n("tax") + labor + n("cloth");
+    const profit = n("rev") - cost;
+    $("profit").textContent = fmt(profit);
+    $("profit").className = "v " + (profit >= 0 ? "pos" : "neg");
+    $("cost").textContent = fmt(cost);
+    $("bep").textContent = fmt(cost);
+    $("year").textContent = fmt(profit * 12);
+    $("year").className = profit >= 0 ? "pos" : "neg";
+    const m = profit > 0 ? n("premium") / profit : Infinity;
+    $("payback").textContent = isFinite(m) ? (m >= 12 ? Math.floor(m / 12) + "년 " + Math.round(m % 12) + "개월" : Math.ceil(m) + "개월") : "회수 불가 (적자)";
   }
-
-  function render() {
-    if (!workHoursTouched) el.workHours.value = Math.max(0, num("close") - num("open"));
-    const r = calc();
-
-    const setKpi = (k, v, val) => {
-      document.getElementById("v-" + k).textContent = man(val);
-      const box = document.getElementById("k-" + k);
-      box.classList.toggle("pos", val >= 0); box.classList.toggle("neg", val < 0);
-    };
-    setKpi("cash", "cash", r.cash);
-    setKpi("econ", "econ", r.econ);
-    document.getElementById("v-bep").textContent = man(r.cashCost);
-    const gap = r.revenue - r.cashCost;
-    document.getElementById("s-bep").innerHTML = "현금 기준 · 실질 기준 " + man(r.totalCost) +
-      "<br>현재 매출과 차이 <span class='" + sign(gap) + "'>" + man(gap) + "</span>";
-    const pb = r.cash > 0 ? r.premium / r.cash : Infinity;
-    document.getElementById("v-payback").textContent = isFinite(pb)
-      ? (pb >= 12 ? Math.floor(pb / 12) + "년 " + Math.round(pb % 12) + "개월" : Math.ceil(pb) + "개월")
-      : "회수 불가";
-
-    // 원가 구성
-    const shown = r.costs.filter(x => x.v > 0);
-    document.getElementById("bar").innerHTML = shown.map(x =>
-      `<div title="${x.name} ${man(x.v)}" style="width:${x.v / r.totalCost * 100}%;background:var(${x.c})"></div>`).join("");
-    let rows = r.costs.map(x => `<tr><td><span class="dot" style="background:var(${x.c})"></span>${x.name}</td>
-      <td>${won(x.v)}</td><td>${r.revenue ? pct(x.v / r.revenue) : "-"}</td><td>${x.type}</td></tr>`).join("");
-    rows += `<tr class="total"><td>현금 지출 합계</td><td>${won(r.cashCost)}</td><td>${r.revenue ? pct(r.cashCost / r.revenue) : "-"}</td><td></td></tr>`;
-    rows += `<tr class="total"><td>총 원가 (투자비 포함)</td><td>${won(r.totalCost)}</td><td>${r.revenue ? pct(r.totalCost / r.revenue) : "-"}</td><td></td></tr>`;
-    rows += `<tr><td>월 매출</td><td>${won(r.revenue)}</td><td>100%</td><td></td></tr>`;
-    rows += `<tr><td>연 현금 순이익</td><td class="${sign(r.cash)}">${won(r.cash * 12)}</td><td></td><td></td></tr>`;
-    document.getElementById("costRows").innerHTML = rows;
-
-    // 단위 분석
-    const tableHours = r.tables * r.opHours * r.days;
-    const soldHours = num("price") > 0 ? r.revenue / num("price") : 0;
-    const util = r.capacity > 0 ? r.revenue / r.capacity : NaN;
-    const bepUtil = r.capacity > 0 ? r.cashCost / r.capacity : NaN;
-    const totalInvest = r.premium + r.deposit;
-    const unit = [
-      ["일 영업시간", r.opHours + "시간"],
-      ["월 판매 가능 다이·시간", tableHours.toLocaleString("ko-KR") + "시간"],
-      ["다이 1대당 월 매출", won(r.tables ? r.revenue / r.tables : 0)],
-      ["다이 1대당 월 원가 (현금)", won(r.tables ? r.cashCost / r.tables : 0)],
-      ["다이 1대당 월 원가 (총)", won(r.tables ? r.totalCost / r.tables : 0)],
-      ["다이·시간당 원가 (총)", won(tableHours ? r.totalCost / tableHours : 0)],
-      ["평당 월세", won(num("area") ? num("rent") * MAN / num("area") : 0)],
-      ["일평균 매출", won(r.days ? r.revenue / r.days : 0)],
-      ["월 실제 판매 다이·시간 (추정)", Math.round(soldHours).toLocaleString("ko-KR") + "시간"],
-      ["현재 가동률", pct(util)],
-      ["손익분기 가동률 (현금 기준)", pct(bepUtil)],
-      ["천갈이 1회 총비용", won(r.clothTotal)],
-      ["총 초기투자 (권리금+보증금)", won(totalInvest)],
-      ["연 투자수익률 (현금 순이익 ÷ 총투자)", totalInvest ? `<span class="${sign(r.cash)}">${pct(r.cash * 12 / totalInvest)}</span>` : "-"],
-    ];
-    document.getElementById("unitRows").innerHTML = unit.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("");
-
-    // 시나리오
-    const base = num("revenue");
-    const steps = [-300, -200, -100, 0, 100, 200, 300, 500].map(d => base + d).filter(v => v > 0);
-    document.getElementById("scenRows").innerHTML = steps.map(m => {
-      const s = calc(m * MAN);
-      const u = s.capacity > 0 ? s.revenue / s.capacity : NaN;
-      const cur = m === base ? " style='font-weight:700'" : "";
-      return `<tr${cur}><td>${m.toLocaleString("ko-KR")}만원${m === base ? " (현재)" : ""}</td>
-        <td class="${sign(s.cash)}">${man(s.cash)}</td><td class="${sign(s.econ)}">${man(s.econ)}</td><td>${pct(u)}</td></tr>`;
-    }).join("");
-  }
-
-  ids.forEach(i => { el[i].addEventListener("input", render); el[i].addEventListener("change", render); });
-  document.getElementById("reset").addEventListener("click", () => {
-    ids.forEach(i => { if (el[i].type === "checkbox") el[i].checked = defaults[i]; else el[i].value = defaults[i]; });
-    workHoursTouched = false; render();
-  });
-  render();
-})();
+  document.querySelectorAll("input").forEach(i => i.addEventListener("input", calc));
+  calc();
 </script>
 </body>
 </html>
